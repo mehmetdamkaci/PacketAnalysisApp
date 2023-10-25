@@ -3,11 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
         Height="720" Width="1080" WindowStartupLocation="CenterScreen"
         AllowsTransparency="False" Background="#333333">
 
     <Grid Margin="54,36,41,10">
-
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="657*"></ColumnDefinition>
             <ColumnDefinition Width="328*"></ColumnDefinition>
@@ -42,7 +42,6 @@
             </Grid.Resources>
 
 
-
             <DataGrid Name="dataGrid" AutoGenerateColumns="False" Background="#FF696969" AlternatingRowBackground="LightGray" AlternationCount="2"
                       ItemsSource="{Binding Path=Packets}" SelectedItem="{Binding Path=paketID}" IsReadOnly="True" BorderThickness="0" 
                       CellStyle="{StaticResource Body_Content_DataGrid_Centering}" Margin="32,-32,0,34">
@@ -64,14 +63,14 @@
                 <DataGrid.Columns >
                     <DataGridTextColumn x:Name="paketColumn" Header="PAKET"  Width="*" HeaderStyle="{StaticResource DataGridColumnHeaderCenter}" />
                     <DataGridTextColumn Header="PROJE"  Width="*" HeaderStyle="{StaticResource DataGridColumnHeaderCenter}" />
-                    <DataGridTextColumn Header="TOPLAM"  Width="*" HeaderStyle="{StaticResource DataGridColumnHeaderCenter}" />
+                    <DataGridTextColumn x:Name="toplamColumn" Header="TOPLAM"  Width="*" HeaderStyle="{StaticResource DataGridColumnHeaderCenter}" />
                     <DataGridTextColumn Header="FREKANS"  Width="*" HeaderStyle="{StaticResource DataGridColumnHeaderCenter}" />
                     <!--<DataGridTextColumn Header="DETAY" Binding="{Binding Path=projeID}" Width="*" HeaderStyle="{StaticResource DataGridColumnHeaderCenter}" />-->
                     <DataGridTemplateColumn Header="DETAY"  Width="*" HeaderStyle="{StaticResource DataGridColumnHeaderCenter}" >
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" >
-                                    <Button Content="Detay" Margin="0,0,5,0" Click="ButtonFrekans" Width="60" HorizontalAlignment="Center"/>
+                                    <Button Content="Detay" Margin="0,0,5,0" Click="ButtonDetayClicked" Width="60" HorizontalAlignment="Center"/>
                                     <!--<Button Content="Detay"  Width="48"/>-->
                                 </StackPanel>
                             </DataTemplate>
@@ -98,11 +97,11 @@
         </Border>
         <Button Content="Ayarlar" HorizontalAlignment="Left" Margin="16,-22,0,0" VerticalAlignment="Top" Click="AyarlarClicked"/>
 
-        <!--<lvc:PieChart x:Name="pieChart" Grid.Column="1" Margin="0,-13,0,0" Foreground="AliceBlue"
+        <lvc:PieChart x:Name="pieChart" Grid.Column="1" Margin="0,-13,0,0" Foreground="AliceBlue"
                           InnerRadius="0" LegendLocation="Bottom" Hoverable="True" Series="{Binding SeriesCollection}" Height="300" VerticalAlignment="Top">
-
         </lvc:PieChart>
-        <TextBox x:Name="textBox" Grid.Column="1" HorizontalAlignment="Left" Margin="25,320,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="267" Height="280"/>
+        
+        <!--<TextBox x:Name="textBox" Grid.Column="1" HorizontalAlignment="Left" Margin="25,320,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="267" Height="280"/>
         <Button Grid.Column="1" Content="Button" HorizontalAlignment="Left" Margin="84,619,0,0" VerticalAlignment="Top" Width="145" Click="buttonClick"/>-->
 
     </Grid>

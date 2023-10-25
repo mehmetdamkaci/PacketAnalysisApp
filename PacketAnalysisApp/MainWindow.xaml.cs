@@ -1,17 +1,26 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using LiveCharts;
+using LiveCharts.Wpf;
+using NetMQ;
+using NetMQ.Sockets;
 
 namespace PacketAnalysisApp
 {
@@ -20,14 +29,37 @@ namespace PacketAnalysisApp
     {
         EnumMatchWindow enumMatchWindow = new EnumMatchWindow();
         Dictionary<string, Dictionary<int, string>> enumStruct = new Dictionary<string, Dictionary<int, string>>();
+        Dictionary<string, int[]> totalReceivedaPacket = new Dictionary<string, int[]>();
+
+        ObservableCollection<KeyValuePair<string, int[]>> dataSource = new ObservableCollection<KeyValuePair<string, int[]>>();
+
+        SeriesCollection piechartPaket;
+
+        string paketName = string.Empty;
+        
+        List<ChartValues<int>> chartValuesList = new List<ChartValues<int>>();
+
         public MainWindow()
         {
             InitializeComponent();
+
+            // -------------------- EVENTLER --------------------
             enumMatchWindow.Closed += enumMatchClosed;
             enumMatchWindow.OkKaydetLog.Click += enumKaydetClick;
             enumMatchWindow.UpdatedList += EnumMatchingWindow_UpdatedList;
+
+            // -------------------- ENUM YAPISININ OLULŞTURULMASI --------------------
             enumStruct = enumMatchWindow.enumStruct;
+
+            // -------------------- TOPLAM PAKET SAYISININ TUTAN YAPI --------------------
+            createTotalPacketDict();
+
             updateGrid();
+
+            // -------------------- ZERO MQ DATA ALMA THREAD --------------------
+            Thread subscriber = new Thread(new ThreadStart(receiveData));
+            subscriber.IsBackground = true;
+            subscriber.Start();
         }
 
         // -------------------- DATA GRID DETAY BLOKLARI --------------------
@@ -84,14 +116,31 @@ namespace PacketAnalysisApp
             }
         }
 
+        public void createTotalPacketDict()
+        {
+            totalReceivedaPacket.Clear();
+            for (int i = 0; i < enumStruct[enumMatchWindow.paketName].Count; i++)
+            {
+                int[] deneme = { 0, 0, 0};
+                totalReceivedaPacket.Add(enumStruct[enumMatchWindow.paketName].Values.ElementAt(i), deneme);
+            }
+            dataSource.Clear();
+            foreach (var data in totalReceivedaPacket)
+            {
+                dataSource.Add(data);
+            }
+            //dataSource.Add(totalReceivedaPacket);
+        }
+
         // -------------------- Ayarlar Buton Fonksiyonu --------------------
         public void AyarlarClicked(object sender, RoutedEventArgs e)
         {            
             enumMatchWindow.ShowDialog();
         }
 
-        public void ButtonFrekans(object sender, RoutedEventArgs e)
+        public void ButtonDetayClicked(object sender, RoutedEventArgs e)
         {
+            //enumMatchWindow.Show();
         }
         // -------------------- FİLTRE FONKSİYONU --------------------
         public void searchBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -100,6 +149,7 @@ namespace PacketAnalysisApp
         private void enumKaydetClick(object sender, RoutedEventArgs e)
         {
             enumStruct = enumMatchWindow.enumStruct;
+            createTotalPacketDict();
             updateGrid();
         }
 
@@ -107,15 +157,37 @@ namespace PacketAnalysisApp
 
         public void updateGrid()
         {
-            paketColumn.Binding = new Binding("Value");
+            chartValuesList = new List<ChartValues<int>>();
+            piechartPaket = new SeriesCollection();
+            Func<ChartPoint, string> labelPoint = chartPoint => string.Format("{0} ({1:P})", chartPoint.Y, chartPoint.Participation);
 
-            dataGrid.ItemsSource = enumStruct[enumMatchWindow.paketName];
+            for (int i = 0; i<totalReceivedaPacket.Count; i++)
+            {
+                chartValuesList.Add(new ChartValues<int> { 0 });
+                PieSeries pieSeries = new PieSeries
+                {
+                    Title = totalReceivedaPacket.Keys.ElementAt(i),
+                    Values = chartValuesList[i],
+                    DataLabels = true,
+                    LabelPoint = labelPoint,
+                    //Fill = Brushes.DarkBlue,
+                    FontSize = 12
+                };
+                piechartPaket.Add(pieSeries);
+            }
+            pieChart.Series = piechartPaket;
+
+
+            paketName = enumMatchWindow.paketName;
+
+            paketColumn.Binding = new Binding("Key");
+            toplamColumn.Binding = new Binding("Value[1]");
+
+            dataGrid.ItemsSource = dataSource;
+            //dataGrid.ItemsSource = totalReceivedaPacket.ToList();
+            //dataGrid.ItemsSource = enumStruct[enumMatchWindow.paketName];
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {            
-            enumMatchWindow.ShowDialog();            
-        }
 
         private void enumMatchClosed(object sender, EventArgs e)
         {
@@ -140,6 +212,55 @@ namespace PacketAnalysisApp
         {
             //enumStruct = updatedList;
             //textBox.Text = string.Empty;
+        }
+
+        public void receiveData()
+        {
+            byte[] bytes = new byte[6];
+
+            using (var subSocket = new SubscriberSocket())
+            {
+
+                subSocket.Options.ReceiveHighWatermark = 1000;
+                subSocket.Connect("tcp://127.0.0.1:12345");
+                subSocket.SubscribeToAnyTopic();
+
+                while (true)
+                {
+                    bytes = ReceivingSocketExtensions.ReceiveFrameBytes(subSocket);
+                    totalReceivedaPacket[enumStruct[paketName].Values.ElementAt((int)bytes[0])][1] += 1;
+                    int idx = totalReceivedaPacket.Keys.ToList().IndexOf(enumStruct[paketName].Values.ElementAt((int)bytes[0]));
+                    
+
+                    dataGrid.Dispatcher.Invoke(new System.Action(() =>
+                    {
+                        chartValuesList[idx][0] = totalReceivedaPacket[enumStruct[paketName].Values.ElementAt((int)bytes[0])][1] + 1;
+                        piechartPaket[idx].Values = chartValuesList[idx];
+
+                        //for (int i = 0; i< totalReceivedaPacket.Count; i++)
+                        //{
+                        //    dataSource.Add(totalReceivedaPacket.ElementAt(i));
+                        //}
+
+                        var item = dataSource.FirstOrDefault(i => i.Key == enumStruct[paketName].Values.ElementAt((int)bytes[0]));
+                        if (item.Key == null)
+                        {
+                            dataSource.Add(new KeyValuePair<string, int[]>(enumStruct[paketName].Values.ElementAt((int)bytes[0]), totalReceivedaPacket[enumStruct[paketName].Values.ElementAt((int)bytes[0])]));
+                        }
+                        else
+                        {
+                            //dataSource.Remove(item);
+                            int index = dataSource.IndexOf(item);
+                            //item.Value[1] = totalReceivedaPacket[enumStruct[paketName].Values.ElementAt((int)bytes[0])][1];
+                            //dataSource.Add(item);
+                            dataSource[index].Value[1] +=1;
+                        }
+                        dataGrid.Items.Refresh();
+
+                        dataGrid.ItemsSource = dataSource;
+                    }));
+                }
+            }
         }
     }
 }
