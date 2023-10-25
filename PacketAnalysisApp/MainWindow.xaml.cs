@@ -26,6 +26,8 @@ namespace PacketAnalysisApp
             enumMatchWindow.Closed += enumMatchClosed;
             enumMatchWindow.OkKaydetLog.Click += enumKaydetClick;
             enumMatchWindow.UpdatedList += EnumMatchingWindow_UpdatedList;
+            enumStruct = enumMatchWindow.enumStruct;
+            updateGrid();
         }
 
         // -------------------- DATA GRID DETAY BLOKLARI --------------------
@@ -106,6 +108,7 @@ namespace PacketAnalysisApp
         public void updateGrid()
         {
             paketColumn.Binding = new Binding("Value");
+
             dataGrid.ItemsSource = enumStruct[enumMatchWindow.paketName];
         }
 

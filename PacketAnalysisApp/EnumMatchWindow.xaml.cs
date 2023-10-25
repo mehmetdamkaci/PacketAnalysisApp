@@ -67,12 +67,12 @@ namespace PacketAnalysisApp
 
         string newPath;
 
-        public string paketName = string.Empty;
+        public string paketName = "YZB_PAKET";
 
         public EnumMatchWindow()
         {
             InitializeComponent();
-            FileNameTextBox.Text = "C:\\Users\\PC_4232\\Desktop\\Mehmet\\newEnums.cs";
+            FileNameTextBox.Text = "C:\\Users\\PC_4232\\Desktop\\Mehmet\\OrnekEnum.cs";
             viewEnums();
         }
 
@@ -86,7 +86,7 @@ namespace PacketAnalysisApp
 
             if (path == null)
             {
-                csText = File.ReadAllText("C:\\Users\\PC_4232\\Desktop\\Mehmet\\newenum1.cs");
+                csText = File.ReadAllText("C:\\Users\\PC_4232\\Desktop\\Mehmet\\OrnekEnum.cs");
             }
             else
             {
