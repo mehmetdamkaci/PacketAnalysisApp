@@ -64,7 +64,7 @@
                     <DataGridTextColumn x:Name="paketColumn" Header="PAKET"  Width="*" HeaderStyle="{StaticResource DataGridColumnHeaderCenter}" />
                     <DataGridTextColumn Header="PROJE"  Width="*" HeaderStyle="{StaticResource DataGridColumnHeaderCenter}" />
                     <DataGridTextColumn x:Name="toplamColumn" Header="TOPLAM"  Width="*" HeaderStyle="{StaticResource DataGridColumnHeaderCenter}" />
-                    <DataGridTextColumn Header="FREKANS"  Width="*" HeaderStyle="{StaticResource DataGridColumnHeaderCenter}" />
+                    <DataGridTextColumn x:Name="frekansColumn" Header="FREKANS"  Width="*" HeaderStyle="{StaticResource DataGridColumnHeaderCenter}" />
                     <!--<DataGridTextColumn Header="DETAY" Binding="{Binding Path=projeID}" Width="*" HeaderStyle="{StaticResource DataGridColumnHeaderCenter}" />-->
                     <DataGridTemplateColumn Header="DETAY"  Width="*" HeaderStyle="{StaticResource DataGridColumnHeaderCenter}" >
                         <DataGridTemplateColumn.CellTemplate>

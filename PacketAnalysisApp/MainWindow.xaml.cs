@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -17,6 +18,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using LiveCharts;
 using LiveCharts.Wpf;
 using NetMQ;
@@ -39,17 +41,21 @@ namespace PacketAnalysisApp
         
         List<ChartValues<int>> chartValuesList = new List<ChartValues<int>>();
 
+        private DispatcherTimer timer;
+
+        byte[] bytes;
+        int[] privTotal;
+
         public MainWindow()
         {
             InitializeComponent();
-
             // -------------------- EVENTLER --------------------
             enumMatchWindow.Closed += enumMatchClosed;
             enumMatchWindow.OkKaydetLog.Click += enumKaydetClick;
             enumMatchWindow.UpdatedList += EnumMatchingWindow_UpdatedList;
 
             // -------------------- ENUM YAPISININ OLULŞTURULMASI --------------------
-            enumStruct = enumMatchWindow.enumStruct;
+            enumStruct = enumMatchWindow.enumStructMain;
 
             // -------------------- TOPLAM PAKET SAYISININ TUTAN YAPI --------------------
             createTotalPacketDict();
@@ -119,23 +125,53 @@ namespace PacketAnalysisApp
         public void createTotalPacketDict()
         {
             totalReceivedaPacket.Clear();
+
             for (int i = 0; i < enumStruct[enumMatchWindow.paketName].Count; i++)
             {
-                int[] deneme = { 0, 0, 0};
+                int[] deneme = { 0, 0, 0 };
                 totalReceivedaPacket.Add(enumStruct[enumMatchWindow.paketName].Values.ElementAt(i), deneme);
             }
+
+
             dataSource.Clear();
             foreach (var data in totalReceivedaPacket)
             {
                 dataSource.Add(data);
             }
             //dataSource.Add(totalReceivedaPacket);
+
+            // -------------------- FREKANS İÇİN TIMER --------------------
+            privTotal = new int[totalReceivedaPacket.Count];
+            privTotal = privTotal.Select(x => 0).ToArray();
+            timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromMilliseconds(1000);
+            timer.Tick += UpdateFrekans;
+            timer.Start();
+
+        }
+
+        private void UpdateFrekans(object sender, EventArgs e)
+        {
+
+            for (int i = 0; i < totalReceivedaPacket.Count; i++)
+            {                    
+                int currentTotal = totalReceivedaPacket[enumStruct[paketName].Values.ElementAt(i)][1];
+                totalReceivedaPacket[enumStruct[paketName].Values.ElementAt(i)][0] = currentTotal - privTotal[i];
+                privTotal[i] = currentTotal;
+            }
+
+
+
+            //int currentTotal = totalReceivedaPacket[enumStruct[paketName].Values.ElementAt((int)bytes[0])][1];
+            //totalReceivedaPacket[enumStruct[paketName].Values.ElementAt((int)bytes[0])][0] = currentTotal - privTotal;
+            //privTotal = totalReceivedaPacket[enumStruct[paketName].Values.ElementAt((int)bytes[0])][1];            
         }
 
         // -------------------- Ayarlar Buton Fonksiyonu --------------------
         public void AyarlarClicked(object sender, RoutedEventArgs e)
-        {            
-            enumMatchWindow.ShowDialog();
+        {   
+            timer.Stop();
+            enumMatchWindow.Show();
         }
 
         public void ButtonDetayClicked(object sender, RoutedEventArgs e)
@@ -181,6 +217,7 @@ namespace PacketAnalysisApp
             paketName = enumMatchWindow.paketName;
 
             paketColumn.Binding = new Binding("Key");
+            frekansColumn.Binding = new Binding("Value[0]");
             toplamColumn.Binding = new Binding("Value[1]");
 
             dataGrid.ItemsSource = dataSource;
@@ -216,7 +253,7 @@ namespace PacketAnalysisApp
 
         public void receiveData()
         {
-            byte[] bytes = new byte[6];
+            bytes = new byte[6];
 
             using (var subSocket = new SubscriberSocket())
             {
@@ -228,9 +265,15 @@ namespace PacketAnalysisApp
                 while (true)
                 {
                     bytes = ReceivingSocketExtensions.ReceiveFrameBytes(subSocket);
+
+
                     totalReceivedaPacket[enumStruct[paketName].Values.ElementAt((int)bytes[0])][1] += 1;
-                    int idx = totalReceivedaPacket.Keys.ToList().IndexOf(enumStruct[paketName].Values.ElementAt((int)bytes[0]));
+
+
                     
+                    
+                    int idx = totalReceivedaPacket.Keys.ToList().IndexOf(enumStruct[paketName].Values.ElementAt((int)bytes[0]));
+
 
                     dataGrid.Dispatcher.Invoke(new System.Action(() =>
                     {
@@ -253,12 +296,12 @@ namespace PacketAnalysisApp
                             int index = dataSource.IndexOf(item);
                             //item.Value[1] = totalReceivedaPacket[enumStruct[paketName].Values.ElementAt((int)bytes[0])][1];
                             //dataSource.Add(item);
-                            dataSource[index].Value[1] +=1;
+                            dataSource[index].Value[1] += 1;
                         }
                         dataGrid.Items.Refresh();
 
                         dataGrid.ItemsSource = dataSource;
-                    }));
+                    }));                    
                 }
             }
         }

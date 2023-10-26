@@ -22,6 +22,7 @@ namespace PacketAnalysisApp
     {
 
         public Dictionary<string, Dictionary<int, string>> enumStruct = new Dictionary<string, Dictionary<int, string>>();
+        public Dictionary<string, Dictionary<int, string>> enumStructMain = new Dictionary<string, Dictionary<int, string>>();
 
 
         public event Action<Dictionary<string, Dictionary<int, string>>> UpdatedList;
@@ -73,7 +74,8 @@ namespace PacketAnalysisApp
         {
             InitializeComponent();
             FileNameTextBox.Text = "C:\\Users\\PC_4232\\Desktop\\Mehmet\\OrnekEnum.cs";
-            viewEnums();
+            viewEnums();            
+            enumStructMain = enumStruct;
         }
 
         public void viewEnums(string path = null)
@@ -691,6 +693,7 @@ namespace PacketAnalysisApp
         public Dictionary<string, List<string>> ProcessEnumCode(string enumCode)
         {
             if (enumStruct != null) enumStruct.Clear();
+            enumStruct = new Dictionary<string, Dictionary<int, string>>();
             Dictionary<string, List<string>> enums = new Dictionary<string, List<string>>();
 
             var syntaxTree = CSharpSyntaxTree.ParseText(enumCode);
@@ -935,6 +938,12 @@ namespace PacketAnalysisApp
             }
 
             kaydetStack.Visibility = Visibility.Collapsed;
+
+
+            paketName = clickedButton.Content.ToString().Trim();
+
+            
+            enumStructMain = enumStruct;
 
             UpdatedList?.Invoke(enumStruct);
             this.Close();
