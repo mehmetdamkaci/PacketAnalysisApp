@@ -261,8 +261,26 @@ namespace PacketAnalysisApp
             //enumMatchWindow.Show();
         }
         // -------------------- FİLTRE FONKSİYONU --------------------
+        List<KeyValuePair<string, int[]>> filterModeList = new List<KeyValuePair<string, int[]>>();
         public void searchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
+
+            filterModeList.Clear();
+            if (searchBox.Text.Equals(""))
+            {
+                filterModeList.AddRange(dataSource.ToList());
+            }
+            else
+            {
+                foreach (KeyValuePair<string, int[]> packet in dataSource)
+                {
+                    if (packet.Key.Contains(searchBox.Text) || packet.Key.Contains(searchBox.Text.ToUpper()) || packet.Key.Contains(searchBox.Text.ToLower()))
+                    {
+                        filterModeList.Add(packet);
+                    }
+                }
+            }
+            dataGrid.ItemsSource = filterModeList.ToList();
         }
         private void enumKaydetClick(object sender, RoutedEventArgs e)
         {
