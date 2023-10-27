@@ -74,6 +74,7 @@ namespace PacketAnalysisApp
         Dictionary<string, CartesianChart> chartList = new Dictionary<string, CartesianChart>();
         Dictionary<string, LineSeries> lineSeriesList = new Dictionary<string, LineSeries>();
         Dictionary<string, ChartValues<int>> lineValuesList = new Dictionary<string, ChartValues<int>>();
+        ObservableCollection<string> chartXLabels = new ObservableCollection<string>();
         CartesianChart chartDeneme;
         LineSeries lineSeries = new LineSeries();
         ChartValues<int> cv = new ChartValues<int>();
@@ -159,6 +160,7 @@ namespace PacketAnalysisApp
             chartList = new Dictionary<string, CartesianChart>();
             lineSeriesList = new Dictionary<string, LineSeries>();
             lineValuesList = new Dictionary<string, ChartValues<int>>();
+            chartXLabels = new ObservableCollection<string>();
             totalReceivedaPacket.Clear();
 
             for (int i = 0; i < enumStruct[enumMatchWindow.paketName].Count; i++)
@@ -166,6 +168,7 @@ namespace PacketAnalysisApp
                 int[] deneme = { 0, 0, 0 };
                 totalReceivedaPacket.Add(enumStruct[enumMatchWindow.paketName].Values.ElementAt(i), deneme);
                 chartList.Add(enumStruct[enumMatchWindow.paketName].Values.ElementAt(i), new CartesianChart());
+                //chartList[enumStruct[enumMatchWindow.paketName].Values.ElementAt(i)].AxisX.Add(new Axis());
                 lineSeriesList.Add(enumStruct[enumMatchWindow.paketName].Values.ElementAt(i), new LineSeries());
                 lineValuesList.Add(enumStruct[enumMatchWindow.paketName].Values.ElementAt(i), new ChartValues<int>());
             }
@@ -182,8 +185,8 @@ namespace PacketAnalysisApp
 
         private void UpdateFrekans(object sender, EventArgs e)
         {
-            
 
+            chartXLabels.Add(DateTime.Now.ToString("HH:mm:ss"));
             for (int i = 0; i < totalReceivedaPacket.Count; i++)
             {
                 int currentTotal = totalReceivedaPacket[enumStruct[paketName].Values.ElementAt(i)][1];
@@ -208,7 +211,7 @@ namespace PacketAnalysisApp
                 totalReceivedaPacket[enumStruct[paketName].Values.ElementAt(i)][0] = currentTotal - privTotal[i];
                 privTotal[i] = currentTotal;
                 lineValuesList[totalReceivedaPacket.Keys.ElementAt(i)].Add(totalReceivedaPacket[enumStruct[paketName].Values.ElementAt(i)][0]);
-                lineSeriesList[totalReceivedaPacket.Keys.ElementAt(i)].Values = lineValuesList[totalReceivedaPacket.Keys.ElementAt(i)];
+                lineSeriesList[totalReceivedaPacket.Keys.ElementAt(i)].Values = lineValuesList[totalReceivedaPacket.Keys.ElementAt(i)];                
 
                 //cv.Add(totalReceivedaPacket[enumStruct[paketName].Values.ElementAt(i)][0]);
                 //lineSeries.Values = cv;
@@ -234,6 +237,7 @@ namespace PacketAnalysisApp
                 chartList[selectedRow.Key] = sender as CartesianChart;
                 chartList[selectedRow.Key].Height = 200;
                 chartList[selectedRow.Key].Series = new SeriesCollection { lineSeriesList[selectedRow.Key] };
+                chartList[selectedRow.Key].AxisX[0].Labels = chartXLabels;
             } 
 
             //chartDeneme.Series = new SeriesCollection(lineSeries);

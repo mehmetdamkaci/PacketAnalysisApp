@@ -11,11 +11,12 @@
     <Window.Resources>
         <local:StringConcatConverter x:Key="StringConcatConverter" />
     </Window.Resources>
-    
+
     <Grid Margin="54,36,41,10">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="657*"></ColumnDefinition>
-            <ColumnDefinition Width="328*"></ColumnDefinition>
+            <ColumnDefinition Width="31*"></ColumnDefinition>
+            <ColumnDefinition Width="298*"/>
+            <ColumnDefinition Width="164*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
         <Grid.Resources>
@@ -34,7 +35,7 @@
             </Style>
         </Grid.Resources>
 
-        <Grid Margin="-32,50,40,0">
+        <Grid Margin="-32,50,40,0" Grid.ColumnSpan="2">
             <Grid.Resources>
                 <Style x:Key="DataGridColumnHeaderCenter" TargetType="DataGridColumnHeader">
                     <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -87,7 +88,7 @@
                 <DataGrid.RowDetailsTemplate >
                     <DataTemplate >
                         <StackPanel>
-                            <Label HorizontalContentAlignment="Center">
+                            <Label HorizontalContentAlignment="Center" FontWeight="Bold" Foreground="White" Background="DimGray" Margin="20,5,20,0">
                                 <Label.Content>
                                     <MultiBinding Converter="{StaticResource StringConcatConverter}">
                                         <Binding Path="Key" />
@@ -96,7 +97,13 @@
                                 </Label.Content>
                             </Label>
 
-                            <lvc:CartesianChart Margin="20,10,20,10" x:Name="realTimeChart" Background="DimGray" Zoom="X" Loaded="LoadTextBlock">
+                            <lvc:CartesianChart Margin="20,0,20,10" x:Name="realTimeChart" Background="DimGray" Zoom="X" Loaded="LoadTextBlock">
+                                <lvc:CartesianChart.AxisX>
+                                    <lvc:Axis Name="XAxis" Title="Zaman" Labels="{Binding chartXLabels}" LabelsRotation="30" FontSize="16" Foreground="White"/>
+                                </lvc:CartesianChart.AxisX>
+                                <lvc:CartesianChart.AxisY>
+                                    <lvc:Axis Name="YAxis" Title="Paket Sayısı" FontSize="16" Foreground="White"/>
+                                </lvc:CartesianChart.AxisY>
                             </lvc:CartesianChart>
 
                         </StackPanel>
@@ -110,18 +117,22 @@
 
         </Grid>
 
-        <Border CornerRadius="5" BorderBrush="Black" BorderThickness="1" Background="LightGray" Height="25" VerticalAlignment="Top" Margin="0,-22,40,0" HorizontalAlignment="Right" Width="200">
+        <Border CornerRadius="5" BorderBrush="Black" BorderThickness="1" Background="LightGray" Height="25" VerticalAlignment="Top" Margin="0,-22,40,0" HorizontalAlignment="Right" Width="200" Grid.Column="1">
             <StackPanel Margin="0,0,10,0" Height="50" VerticalAlignment="Top" HorizontalAlignment="Right" Width="214">
                 <TextBox x:Name="searchBox" Text="Ara" TextWrapping="Wrap" Background="LightGray" BorderThickness="0"
                                  FontWeight="Bold" VerticalContentAlignment="Center" TextChanged="searchBox_TextChanged" Width="150" Height="23" RenderTransformOrigin="0.511,0.5"/>
             </StackPanel>
         </Border>
-        <Button Content="Ayarlar" HorizontalAlignment="Left" Margin="16,-22,0,0" VerticalAlignment="Top" Click="AyarlarClicked"/>
 
-        <lvc:PieChart x:Name="pieChart" Grid.Column="1" Margin="0,-13,0,0" Foreground="AliceBlue"
+        <Border CornerRadius="5" BorderBrush="Black" BorderThickness="1" Background="LightGray" Height="25" VerticalAlignment="Top" Margin="22,-16,0,0" HorizontalAlignment="Left" Width="60" Grid.ColumnSpan="2">
+            <Button Content="Ayarlar" Background="LightGray" Margin="5,0,3,0" Height="25" 
+                    BorderThickness="0" VerticalAlignment="Center" Click="AyarlarClicked"/>
+        </Border>
+
+        <lvc:PieChart x:Name="pieChart" Grid.Column="2" Margin="0,-13,0,0" Foreground="AliceBlue"
                           InnerRadius="0" LegendLocation="Bottom" Hoverable="True" Series="{Binding SeriesCollection}" Height="300" VerticalAlignment="Top">
         </lvc:PieChart>
-        
+
         <!--<TextBox x:Name="textBox" Grid.Column="1" HorizontalAlignment="Left" Margin="25,320,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="267" Height="280"/>
         <Button Grid.Column="1" Content="Button" HorizontalAlignment="Left" Margin="84,619,0,0" VerticalAlignment="Top" Width="145" Click="buttonClick"/>-->
 
