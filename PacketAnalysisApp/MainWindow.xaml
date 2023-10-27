@@ -3,10 +3,15 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PacketAnalysisApp"
         xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
         Height="720" Width="1080" WindowStartupLocation="CenterScreen"
         AllowsTransparency="False" Background="#333333">
 
+    <Window.Resources>
+        <local:StringConcatConverter x:Key="StringConcatConverter" />
+    </Window.Resources>
+    
     <Grid Margin="54,36,41,10">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="657*"></ColumnDefinition>
@@ -53,12 +58,13 @@
                     </Style>
                 </DataGrid.Resources>
 
-                <DataGrid.RowHeaderTemplate>
+                <!--<DataGrid.RowHeaderTemplate>
                     <DataTemplate>
                         <Expander Expanded="Expander_Expanded" Collapsed="Expander_Collapsed">
                         </Expander>
                     </DataTemplate>
-                </DataGrid.RowHeaderTemplate>
+                </DataGrid.RowHeaderTemplate>-->
+
 
                 <DataGrid.Columns >
                     <DataGridTextColumn x:Name="paketColumn" Header="PAKET"  Width="*" HeaderStyle="{StaticResource DataGridColumnHeaderCenter}" />
@@ -70,8 +76,7 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" >
-                                    <Button Content="Detay" Margin="0,0,5,0" Click="ButtonDetayClicked" Width="60" HorizontalAlignment="Center"/>
-                                    <!--<Button Content="Detay"  Width="48"/>-->
+                                    <Button x:Name="detayButton" Content="Detay" Margin="0,0,5,0" Click="ButtonDetayClicked" Width="60" HorizontalAlignment="Center"/>
                                 </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
@@ -79,11 +84,27 @@
                 </DataGrid.Columns>
 
 
-                <DataGrid.RowDetailsTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding details}" Margin="10,5,0,0" FontFamily="Courier, monospace" FontSize="13"  FontWeight="SemiBold" Foreground="Black" />
+                <DataGrid.RowDetailsTemplate >
+                    <DataTemplate >
+                        <StackPanel>
+                            <Label HorizontalContentAlignment="Center">
+                                <Label.Content>
+                                    <MultiBinding Converter="{StaticResource StringConcatConverter}">
+                                        <Binding Path="Key" />
+                                        <Binding Source=" PAKETİ FREKANS GRAFİĞİ" />
+                                    </MultiBinding>
+                                </Label.Content>
+                            </Label>
+
+                            <lvc:CartesianChart Margin="20,10,20,10" x:Name="realTimeChart" Background="DimGray" Zoom="X" Loaded="LoadTextBlock">
+                            </lvc:CartesianChart>
+
+                        </StackPanel>
+                        <!--<TextBlock x:Name="textBox" Loaded="LoadTextBlock" Text="aaaaaa" Margin="10,5,0,0" FontFamily="Courier, monospace" FontSize="13"  FontWeight="SemiBold" Foreground="Black"/>-->
+
                     </DataTemplate>
                 </DataGrid.RowDetailsTemplate>
+                <DataGrid.RowDetailsVisibilityMode>Collapsed</DataGrid.RowDetailsVisibilityMode>
 
             </DataGrid>
 

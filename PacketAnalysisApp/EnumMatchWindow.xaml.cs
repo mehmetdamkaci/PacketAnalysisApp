@@ -74,7 +74,7 @@ namespace PacketAnalysisApp
         {
             InitializeComponent();
             FileNameTextBox.Text = "C:\\Users\\PC_4232\\Desktop\\Mehmet\\OrnekEnum.cs";
-            viewEnums();            
+            viewEnums();
             enumStructMain = enumStruct;
         }
 
@@ -196,7 +196,7 @@ namespace PacketAnalysisApp
 
         private void enumButtonClick(object sender, RoutedEventArgs e)
         {
-            
+
 
             if (gridItemComboList != null) gridItemComboList.Clear();
             updatedComboBoxs = new List<ComboBox>();
@@ -942,7 +942,7 @@ namespace PacketAnalysisApp
 
             paketName = clickedButton.Content.ToString().Trim();
 
-            
+
             enumStructMain = enumStruct;
 
             UpdatedList?.Invoke(enumStruct);
