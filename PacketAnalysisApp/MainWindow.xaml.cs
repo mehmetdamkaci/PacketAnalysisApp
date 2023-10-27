@@ -168,7 +168,6 @@ namespace PacketAnalysisApp
                 int[] deneme = { 0, 0, 0 };
                 totalReceivedaPacket.Add(enumStruct[enumMatchWindow.paketName].Values.ElementAt(i), deneme);
                 chartList.Add(enumStruct[enumMatchWindow.paketName].Values.ElementAt(i), new CartesianChart());
-                //chartList[enumStruct[enumMatchWindow.paketName].Values.ElementAt(i)].AxisX.Add(new Axis());
                 lineSeriesList.Add(enumStruct[enumMatchWindow.paketName].Values.ElementAt(i), new LineSeries());
                 lineValuesList.Add(enumStruct[enumMatchWindow.paketName].Values.ElementAt(i), new ChartValues<int>());
             }
@@ -250,10 +249,11 @@ namespace PacketAnalysisApp
 
         public void ButtonDetayClicked(object sender, RoutedEventArgs e)
         {
-            if (dataGrid.SelectedItem != null)
+            var selectedRow = dataGrid.SelectedItem;
+            if (selectedRow != null)
             {
-                KeyValuePair<string, int[]> selectedRow = (KeyValuePair<string, int[]>)dataGrid.SelectedItem;
-                row = (DataGridRow)dataGrid.ItemContainerGenerator.ContainerFromItem(selectedRow);
+                KeyValuePair<string, int[]> a = (KeyValuePair<string, int[]>)selectedRow;
+                row = (DataGridRow)dataGrid.ItemContainerGenerator.ContainerFromItem(a);
                 if (row.DetailsVisibility != Visibility.Visible) row.DetailsVisibility = Visibility.Visible;
                 else row.DetailsVisibility = Visibility.Collapsed;
             }           
@@ -421,6 +421,19 @@ namespace PacketAnalysisApp
                     }));
                 }
             }
+        }
+
+        private void MainAppClosed(object sender, EventArgs e)
+        {
+            Environment.Exit(0);
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            chartList["YZB_SURECLER"].AxisY[0].MinValue = lineValuesList["YZB_SURECLER"].Min();
+            chartList["YZB_SURECLER"].AxisY[0].MaxValue = lineValuesList["YZB_SURECLER"].Max();
+            chartList["YZB_SURECLER"].AxisX[0].MinValue = 0;
+            chartList["YZB_SURECLER"].AxisX[0].MaxValue = chartXLabels.Count - 1;
         }
     }
 }

@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:PacketAnalysisApp"
         xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
         Height="720" Width="1080" WindowStartupLocation="CenterScreen"
-        AllowsTransparency="False" Background="#333333">
+        AllowsTransparency="False" Background="#333333" Closed="MainAppClosed">
 
     <Window.Resources>
         <local:StringConcatConverter x:Key="StringConcatConverter" />
@@ -50,7 +50,7 @@
 
             <DataGrid Name="dataGrid" AutoGenerateColumns="False" Background="#FF696969" AlternatingRowBackground="LightGray" AlternationCount="2"
                       ItemsSource="{Binding Path=Packets}" SelectedItem="{Binding Path=paketID}" IsReadOnly="True" BorderThickness="0" 
-                      CellStyle="{StaticResource Body_Content_DataGrid_Centering}" Margin="32,-32,0,34">
+                      CellStyle="{StaticResource Body_Content_DataGrid_Centering}" Margin="32,-32,0,34" SelectionUnit="FullRow">
 
                 <DataGrid.Resources>
                     <Style TargetType="{x:Type DataGridColumnHeader}">
@@ -73,7 +73,7 @@
                     <DataGridTextColumn x:Name="toplamColumn" Header="TOPLAM"  Width="*" HeaderStyle="{StaticResource DataGridColumnHeaderCenter}" />
                     <DataGridTextColumn x:Name="frekansColumn" Header="FREKANS"  Width="*" HeaderStyle="{StaticResource DataGridColumnHeaderCenter}" />
                     <!--<DataGridTextColumn Header="DETAY" Binding="{Binding Path=projeID}" Width="*" HeaderStyle="{StaticResource DataGridColumnHeaderCenter}" />-->
-                    <DataGridTemplateColumn Header="DETAY"  Width="*" HeaderStyle="{StaticResource DataGridColumnHeaderCenter}" >
+                    <DataGridTemplateColumn Header="DETAY"  Width="*" HeaderStyle="{StaticResource DataGridColumnHeaderCenter}" Selector.IsSelected="False">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" >
@@ -97,12 +97,18 @@
                                 </Label.Content>
                             </Label>
 
-                            <lvc:CartesianChart Margin="20,0,20,10" x:Name="realTimeChart" Background="DimGray" Zoom="X" Loaded="LoadTextBlock">
+                            <lvc:CartesianChart Margin="20,0,20,10" x:Name="realTimeChart" Background="DimGray" Zoom="X" Loaded="LoadTextBlock" ScrollMode="None" Pan="X"
+                                                DisableAnimations ="True" Hoverable="False" AllowDrop="True" DataTooltip="{x:Null}" Focusable="True">
+                                <lvc:CartesianChart.CacheMode>
+                                    <BitmapCache EnableClearType="False" 
+                                                RenderAtScale="1"
+                                                SnapsToDevicePixels="False" />
+                                </lvc:CartesianChart.CacheMode>
                                 <lvc:CartesianChart.AxisX>
-                                    <lvc:Axis Name="XAxis" Title="Zaman" Labels="{Binding chartXLabels}" LabelsRotation="30" FontSize="16" Foreground="White"/>
+                                    <lvc:Axis Name="XAxis" Title="Zaman" Labels="{Binding chartXLabels}" LabelsRotation="30" FontSize="16" Foreground="White" DisableAnimations ="True"/>
                                 </lvc:CartesianChart.AxisX>
                                 <lvc:CartesianChart.AxisY>
-                                    <lvc:Axis Name="YAxis" Title="Paket Sayısı" FontSize="16" Foreground="White"/>
+                                    <lvc:Axis Name="YAxis" Title="Paket Sayısı" FontSize="16" Foreground="White" DisableAnimations ="True"/>
                                 </lvc:CartesianChart.AxisY>
                             </lvc:CartesianChart>
 
@@ -132,6 +138,7 @@
         <lvc:PieChart x:Name="pieChart" Grid.Column="2" Margin="0,-13,0,0" Foreground="AliceBlue"
                           InnerRadius="0" LegendLocation="Bottom" Hoverable="True" Series="{Binding SeriesCollection}" Height="300" VerticalAlignment="Top">
         </lvc:PieChart>
+        <Button Grid.Column="2" Content="Button" HorizontalAlignment="Left" Margin="161,406,0,0" VerticalAlignment="Top" Click="Button_Click"/>
 
         <!--<TextBox x:Name="textBox" Grid.Column="1" HorizontalAlignment="Left" Margin="25,320,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="267" Height="280"/>
         <Button Grid.Column="1" Content="Button" HorizontalAlignment="Left" Margin="84,619,0,0" VerticalAlignment="Top" Width="145" Click="buttonClick"/>-->
