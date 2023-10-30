@@ -78,6 +78,16 @@ namespace PacketAnalysisApp
         CartesianChart chartDeneme;
         LineSeries lineSeries = new LineSeries();
         ChartValues<int> cv = new ChartValues<int>();
+
+        Dictionary<string, Button> zoomButtons = new Dictionary<string, Button>();
+        Dictionary<string, Button> realButtons = new Dictionary<string, Button>();
+        Dictionary<string, string> chartStatuses = new Dictionary<string, string>();
+
+        Button zoomButton = new Button();
+        Button realButton = new Button();
+
+        string chartStatus = "DEFAULT";
+
         public MainWindow()
         {
 ;
@@ -86,6 +96,9 @@ namespace PacketAnalysisApp
             enumMatchWindow.Closed += enumMatchClosed;
             enumMatchWindow.OkKaydetLog.Click += enumKaydetClick;
             enumMatchWindow.UpdatedList += EnumMatchingWindow_UpdatedList;
+
+
+            //zoomButton.Click += Button_Click;
 
             // -------------------- ENUM YAPISININ OLULŞTURULMASI --------------------
             enumStruct = enumMatchWindow.enumStructMain;
@@ -155,12 +168,27 @@ namespace PacketAnalysisApp
             }
         }
 
+        private void zoomButtonLoaded(object sender, RoutedEventArgs e)
+        {
+            zoomButton = sender as Button;
+            //zoomButton.Click += Button_Click;
+        }
+
+        private void realButtonLoaded(object sender, RoutedEventArgs e)
+        {
+            realButton = sender as Button;
+            //zoomButton.Click += Button_Click;
+        }
+
         public void createTotalPacketDict()
         {
             chartList = new Dictionary<string, CartesianChart>();
             lineSeriesList = new Dictionary<string, LineSeries>();
             lineValuesList = new Dictionary<string, ChartValues<int>>();
             chartXLabels = new ObservableCollection<string>();
+            zoomButtons = new Dictionary<string, Button>();
+            realButtons = new Dictionary<string, Button>();
+            chartStatuses = new Dictionary<string, string>();
             totalReceivedaPacket.Clear();
 
             for (int i = 0; i < enumStruct[enumMatchWindow.paketName].Count; i++)
@@ -170,6 +198,9 @@ namespace PacketAnalysisApp
                 chartList.Add(enumStruct[enumMatchWindow.paketName].Values.ElementAt(i), new CartesianChart());
                 lineSeriesList.Add(enumStruct[enumMatchWindow.paketName].Values.ElementAt(i), new LineSeries());
                 lineValuesList.Add(enumStruct[enumMatchWindow.paketName].Values.ElementAt(i), new ChartValues<int>());
+                zoomButtons.Add(enumStruct[enumMatchWindow.paketName].Values.ElementAt(i), new Button());
+                realButtons.Add(enumStruct[enumMatchWindow.paketName].Values.ElementAt(i), new Button());
+                chartStatuses.Add(enumStruct[enumMatchWindow.paketName].Values.ElementAt(i), "DEFAULT");
             }
 
 
@@ -210,14 +241,74 @@ namespace PacketAnalysisApp
                 totalReceivedaPacket[enumStruct[paketName].Values.ElementAt(i)][0] = currentTotal - privTotal[i];
                 privTotal[i] = currentTotal;
                 lineValuesList[totalReceivedaPacket.Keys.ElementAt(i)].Add(totalReceivedaPacket[enumStruct[paketName].Values.ElementAt(i)][0]);
-                lineSeriesList[totalReceivedaPacket.Keys.ElementAt(i)].Values = lineValuesList[totalReceivedaPacket.Keys.ElementAt(i)];                
-
+                lineSeriesList[totalReceivedaPacket.Keys.ElementAt(i)].Values = lineValuesList[totalReceivedaPacket.Keys.ElementAt(i)];
+                try 
+                {
+                    switch (chartStatuses[totalReceivedaPacket.Keys.ElementAt(i)])
+                    {
+                        case "ZOOM-":
+                            chartList[totalReceivedaPacket.Keys.ElementAt(i)].Zoom = ZoomingOptions.None;
+                            chartList[totalReceivedaPacket.Keys.ElementAt(i)].Pan = PanningOptions.None;
+                            chartList[totalReceivedaPacket.Keys.ElementAt(i)].AxisY[0].MinValue = lineValuesList[totalReceivedaPacket.Keys.ElementAt(i)].Min();
+                            chartList[totalReceivedaPacket.Keys.ElementAt(i)].AxisY[0].MaxValue = lineValuesList[totalReceivedaPacket.Keys.ElementAt(i)].Max();
+                            chartList[totalReceivedaPacket.Keys.ElementAt(i)].AxisX[0].MinValue = 0;
+                            chartList[totalReceivedaPacket.Keys.ElementAt(i)].AxisX[0].MaxValue = chartXLabels.Count - 1;
+                            break;
+                        case "REAL":
+                            chartList[totalReceivedaPacket.Keys.ElementAt(i)].AxisY[0].MinValue = 0;
+                            chartList[totalReceivedaPacket.Keys.ElementAt(i)].AxisY[0].MaxValue = lineValuesList[totalReceivedaPacket.Keys.ElementAt(i)].Max();
+                            chartList[totalReceivedaPacket.Keys.ElementAt(i)].AxisX[0].MinValue = chartXLabels.Count - 20;
+                            chartList[totalReceivedaPacket.Keys.ElementAt(i)].AxisX[0].MaxValue = chartXLabels.Count - 1;
+                            break;
+                        case "DEFAULT":
+                            chartList[totalReceivedaPacket.Keys.ElementAt(i)].Zoom = ZoomingOptions.X;
+                            chartList[totalReceivedaPacket.Keys.ElementAt(i)].Pan = PanningOptions.X;                           
+                            break;
+                    }
+                    ////chartList["YZB_SURECLER"].AxisX[0].MouseWheel += ChartZoomEvent;
+                    //chartList["YZB_SURECLER"].Zoom = ZoomingOptions.X;
+                    //chartList["YZB_SURECLER"].AxisY[0].MinValue = 0;
+                    //chartList["YZB_SURECLER"].AxisY[0].MaxValue = lineValuesList["YZB_SURECLER"].Max();
+                    //chartList["YZB_SURECLER"].AxisX[0].MinValue = chartXLabels.Count - 20;
+                    //chartList["YZB_SURECLER"].AxisX[0].MaxValue = chartXLabels.Count - 1;
+                }
+                catch
+                {
+                    continue;
+                }
                 //cv.Add(totalReceivedaPacket[enumStruct[paketName].Values.ElementAt(i)][0]);
                 //lineSeries.Values = cv;
             }
             //int currentTotal = totalReceivedaPacket[enumStruct[paketName].Values.ElementAt((int)bytes[0])][1];
             //totalReceivedaPacket[enumStruct[paketName].Values.ElementAt((int)bytes[0])][0] = currentTotal - privTotal;
             //privTotal = totalReceivedaPacket[enumStruct[paketName].Values.ElementAt((int)bytes[0])][1];            
+        }
+
+        
+
+        private void ChartPanEvent(object sender, MouseButtonEventArgs e )
+        {
+
+            CartesianChart chart = sender as CartesianChart;
+            if (chart != null)
+            {
+                chartStatuses[chart.Name] = "DEFAULT";
+            }
+
+            //chartStatus = "DEFAULT";
+        }
+
+
+        private void ChartZoomEvent(object sender, MouseWheelEventArgs e)
+        {
+
+            CartesianChart chart = sender as CartesianChart;
+            if (chart != null)
+            {
+                chartStatuses[chart.Name] = "DEFAULT";
+            }
+
+            //chartStatus = "DEFAULT";
         }
 
         // -------------------- Ayarlar Buton Fonksiyonu --------------------
@@ -229,15 +320,19 @@ namespace PacketAnalysisApp
 
         private void LoadTextBlock(object sender, RoutedEventArgs e)
         {
-
-            if (dataGrid.SelectedItem != null) 
+            dataGrid.Dispatcher.Invoke(new Action(() =>
             {
-                KeyValuePair<string, int[]> selectedRow = (KeyValuePair<string, int[]>)dataGrid.SelectedItem;
-                chartList[selectedRow.Key] = sender as CartesianChart;
-                chartList[selectedRow.Key].Height = 200;
-                chartList[selectedRow.Key].Series = new SeriesCollection { lineSeriesList[selectedRow.Key] };
-                chartList[selectedRow.Key].AxisX[0].Labels = chartXLabels;
-            } 
+                var selecteItem = dataGrid.SelectedItem;
+                if (selecteItem != null)
+                {
+                    KeyValuePair<string, int[]> selectedRow = (KeyValuePair<string, int[]>)selecteItem;
+                    chartList[selectedRow.Key] = sender as CartesianChart;
+                    chartList[selectedRow.Key].Name = selectedRow.Key;
+                    chartList[selectedRow.Key].Height = 200;
+                    chartList[selectedRow.Key].Series = new SeriesCollection { lineSeriesList[selectedRow.Key] };
+                    chartList[selectedRow.Key].AxisX[0].Labels = chartXLabels;
+                }
+            }));            
 
             //chartDeneme.Series = new SeriesCollection(lineSeries);
 
@@ -246,18 +341,21 @@ namespace PacketAnalysisApp
 
         }
 
-
         public void ButtonDetayClicked(object sender, RoutedEventArgs e)
         {
-            var selectedRow = dataGrid.SelectedItem;
-            if (selectedRow != null)
+            //MessageBox.Show("Detay Butonuna Tıklandı");
+            dataGrid.Dispatcher.Invoke(new Action(() =>
             {
-                KeyValuePair<string, int[]> a = (KeyValuePair<string, int[]>)selectedRow;
-                row = (DataGridRow)dataGrid.ItemContainerGenerator.ContainerFromItem(a);
-                if (row.DetailsVisibility != Visibility.Visible) row.DetailsVisibility = Visibility.Visible;
-                else row.DetailsVisibility = Visibility.Collapsed;
-            }           
-
+                //var selectedRow = dataGrid.SelectedItem;
+                DataGridRow selectedRow = (DataGridRow)dataGrid.ItemContainerGenerator.ContainerFromItem(dataGrid.SelectedItem);
+                if (selectedRow != null)
+                {
+                    KeyValuePair<string, int[]> a = (KeyValuePair<string, int[]>)selectedRow.Item;
+                    row = (DataGridRow)dataGrid.ItemContainerGenerator.ContainerFromItem(a);
+                    if (row.DetailsVisibility != Visibility.Visible) row.DetailsVisibility = Visibility.Visible;
+                    else row.DetailsVisibility = Visibility.Collapsed;
+                }
+            }));
 
             //row = (DataGridRow)dataGrid.ItemContainerGenerator.ContainerFromItem(dataGrid.SelectedCells[0].Item);            
 
@@ -407,12 +505,16 @@ namespace PacketAnalysisApp
                         }
                         else
                         {
+                            //int value = new int();
+                            //value = totalReceivedaPacket[enumStruct[paketName].Values.ElementAt((int)bytes[0])][1] + 1;
+                            //MessageBox.Show(value.ToString());
                             //dataSource.Remove(item);
                             int index = dataSource.IndexOf(item);
+
                             //item.Value[1] = totalReceivedaPacket[enumStruct[paketName].Values.ElementAt((int)bytes[0])][1];
                             //dataSource.Add(item);
-                            dataSource[index] = new KeyValuePair<string, int[]>(item.Key, new int[] { item.Value[0], item.Value[1] + 1 });
-                            //dataSource[index].Value[1] += 1;
+                            //dataSource[index] = new KeyValuePair<string, int[]>(item.Key, new int[] { item.Value[0], item.Value[1] + 1 });
+                            dataSource[index].Value[1] += 1;
                         }
                         
                         //dataGrid.Items.Refresh();
@@ -430,10 +532,35 @@ namespace PacketAnalysisApp
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            chartList["YZB_SURECLER"].AxisY[0].MinValue = lineValuesList["YZB_SURECLER"].Min();
-            chartList["YZB_SURECLER"].AxisY[0].MaxValue = lineValuesList["YZB_SURECLER"].Max();
-            chartList["YZB_SURECLER"].AxisX[0].MinValue = 0;
-            chartList["YZB_SURECLER"].AxisX[0].MaxValue = chartXLabels.Count - 1;
+            //MessageBox.Show("zoom butonuna tıklandı");
+            dataGrid.Dispatcher.Invoke(new Action(() =>
+            {
+                var selecteItem = dataGrid.SelectedItem;
+                if (selecteItem != null)
+                {
+                    KeyValuePair<string, int[]> selectedRow = (KeyValuePair<string, int[]>)selecteItem;
+                    chartStatuses[selectedRow.Key] = "ZOOM-";
+                }
+            }));
+            //chartStatus = "ZOOM-";
+        }
+        private void realButton_Click(object sender, RoutedEventArgs e)
+        {
+            dataGrid.Dispatcher.Invoke(new Action(() =>
+            {
+                var selecteItem = dataGrid.SelectedItem;
+                if (selecteItem != null)
+                {
+                    KeyValuePair<string, int[]> selectedRow = (KeyValuePair<string, int[]>)selecteItem;
+                    chartStatuses[selectedRow.Key] = "REAL";
+                }
+            }));
+            //chartStatus = "REAL";
+        }
+
+        private void realTimeChart_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+
         }
     }
 }

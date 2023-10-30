@@ -50,7 +50,7 @@
 
             <DataGrid Name="dataGrid" AutoGenerateColumns="False" Background="#FF696969" AlternatingRowBackground="LightGray" AlternationCount="2"
                       ItemsSource="{Binding Path=Packets}" SelectedItem="{Binding Path=paketID}" IsReadOnly="True" BorderThickness="0" 
-                      CellStyle="{StaticResource Body_Content_DataGrid_Centering}" Margin="32,-32,0,34" SelectionUnit="FullRow">
+                      CellStyle="{StaticResource Body_Content_DataGrid_Centering}" Margin="32,-32,0,34" SelectionUnit="FullRow" >
 
                 <DataGrid.Resources>
                     <Style TargetType="{x:Type DataGridColumnHeader}">
@@ -96,9 +96,13 @@
                                     </MultiBinding>
                                 </Label.Content>
                             </Label>
-
-                            <lvc:CartesianChart Margin="20,0,20,10" x:Name="realTimeChart" Background="DimGray" Zoom="X" Loaded="LoadTextBlock" ScrollMode="None" Pan="X"
-                                                DisableAnimations ="True" Hoverable="False" AllowDrop="True" DataTooltip="{x:Null}" Focusable="True">
+                            <StackPanel Margin="20,0,20,0" Orientation="Horizontal" Background="DimGray">
+                                <Button Content="Zoom-" HorizontalContentAlignment="Center" Width="40" Click="Button_Click" Loaded="zoomButtonLoaded"/>
+                                <Button Content="REAL" HorizontalContentAlignment="Center" Width="40" Click="realButton_Click" Loaded="realButtonLoaded"/>
+                            </StackPanel>
+                            <lvc:CartesianChart Margin="20,0,20,10" x:Name="realTimeChart" Background="DimGray" Zoom="None" Loaded="LoadTextBlock" ScrollMode="None" Pan="X"
+                                                DisableAnimations ="True" Hoverable="False" AllowDrop="False" DataTooltip="{x:Null}" Focusable="True" MouseWheel="ChartZoomEvent"
+                                                MouseLeftButtonDown="ChartPanEvent" MouseLeftButtonUp="ChartPanEvent">
                                 <lvc:CartesianChart.CacheMode>
                                     <BitmapCache EnableClearType="False" 
                                                 RenderAtScale="1"
@@ -136,7 +140,13 @@
         </Border>
 
         <lvc:PieChart x:Name="pieChart" Grid.Column="2" Margin="0,-13,0,0" Foreground="AliceBlue"
-                          InnerRadius="0" LegendLocation="Bottom" Hoverable="True" Series="{Binding SeriesCollection}" Height="300" VerticalAlignment="Top">
+                      InnerRadius="0" LegendLocation="Bottom" Hoverable="False" Series="{Binding SeriesCollection}" 
+                      Height="300" VerticalAlignment="Top" DisableAnimations="True" >
+            <lvc:PieChart.CacheMode>
+                <BitmapCache EnableClearType="False" 
+                                                RenderAtScale="1"
+                                                SnapsToDevicePixels="False" />
+            </lvc:PieChart.CacheMode>
         </lvc:PieChart>
         <Button Grid.Column="2" Content="Button" HorizontalAlignment="Left" Margin="161,406,0,0" VerticalAlignment="Top" Click="Button_Click"/>
 
